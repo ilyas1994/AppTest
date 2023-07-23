@@ -10,7 +10,7 @@ namespace TestApp.Helpers.helpersStatic
             ResponseStatus responseData = new ResponseStatus();
 
 
-            string[] formats = { "dd.MM.yyyy", "dd/MM/yyyy" };
+            string[] formats = { "dd.MM.yyyy" };
             DateTime newDate;
 
             if (DateTime.TryParseExact(date, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate))
