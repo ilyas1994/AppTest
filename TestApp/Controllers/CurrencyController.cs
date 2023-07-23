@@ -15,7 +15,7 @@ namespace TestApp.Controllers
         private readonly IConfiguration _configuration;
         private readonly ICurrencyQueries_TestApp_DI _currencyQueries;
         private readonly IValidationDateFormat_TestApp_DI _validatationDateFormat;
-        private IMapper _mapper;
+        private readonly IMapper _mapper;
         public CurrencyController(
             ILogic_Currency_DI logic,
             IConfiguration configuration,
@@ -53,27 +53,15 @@ namespace TestApp.Controllers
             });
             var myMapper = config.CreateMapper();
             var createMapp = myMapper.Map<List<R_CURRENCY>>(data);
-
             var createData = await _currencyQueries.create(createMapp);
             return Ok(createData);
-
         }
 
         [HttpGet("getCurrency")]
         public async Task<IActionResult> currency([FromQuery] string date, string? code)
         {
-
             try
             {
-                //try
-                //{
-                //    DateTime newDate = DateTime.Parse(date);
-                //}
-                //catch (Exception)
-                //{
-
-                //    throw new ArgumentException("Incorrect format");
-                //}
                 var parseDate = DateTime.Parse(date);
                 var data = await _currencyQueries.getCurrency(parseDate, code);
                 return Ok(data);

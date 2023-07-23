@@ -32,7 +32,6 @@ namespace LogicNameSpace
             try
             {
                 response = await _request.request(EXTERNAL_URL);
-
             }
             catch (Exception ex)
             {
@@ -63,17 +62,12 @@ namespace LogicNameSpace
                 }
                 if (response.IsSuccessStatusCode)
                 {
-                    //string xmlContent = await response.Content.ReadAsStringAsync();
-
                     XDocument xmlDocument = XDocument.Parse(xmlContent);
-
-
                     var titleElement2 = xmlDocument.Descendants("info").FirstOrDefault();
                     if (titleElement2 != null)
                     {
                         throw new ArgumentException(titleElement2.Value.ToString());
                     }
-
 
                     var titleElement = xmlDocument.Descendants("item");
 

@@ -9,16 +9,19 @@ namespace TestApp.Helpers.helpersStatic
         {
             ResponseStatus responseData = new ResponseStatus();
 
-            try
+
+            string[] formats = { "dd.MM.yyyy", "dd/MM/yyyy" };
+            DateTime newDate;
+
+            if (DateTime.TryParseExact(date, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate))
             {
-                DateTime newDate = DateTime.Parse(date);
                 responseData.status = true;
                 return responseData;
             }
-            catch (FormatException)
+            else
             {
                 responseData.status = false;
-                responseData.ErrorMessage = "Incorrect format";
+                responseData.ErrorMessage = "Некорректный формат даты! Формат должен быть в таком порядке: dd.MM.yyyy или dd/MM/yyyy";
                 return responseData;
             }
 
