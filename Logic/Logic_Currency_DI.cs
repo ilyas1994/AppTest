@@ -2,6 +2,7 @@
 using Logic.Interfaces;
 using Logic.XMLModel;
 using System.Globalization;
+using System.Text.Json;
 using System.Xml.Linq;
 
 namespace LogicNameSpace
@@ -26,6 +27,7 @@ namespace LogicNameSpace
         private async Task<IEnumerable<XElement?>> getResponseWithData(string EXTERNAL_URL)
         {
             string format = "dd.MM.yyyy";
+            string jsonError = "";
             HttpResponseMessage response = new HttpResponseMessage();
             try
             {
@@ -37,14 +39,42 @@ namespace LogicNameSpace
                 throw new ArgumentException("url error");
             }
 
+            string xmlContent = await response.Content.ReadAsStringAsync();
             try
             {
+                JsonDocument jsonDocument = JsonDocument.Parse(xmlContent);
+                var jsonObject = jsonDocument.RootElement;
+                int code = jsonObject.GetProperty("code").GetInt32();
+                if (code == 500)
+                {
+                    jsonError = jsonObject.GetProperty("message").GetString();
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
+            try
+            {
+                if (jsonError != "")
+                {
+                    throw new ArgumentException(jsonError);
+                }
                 if (response.IsSuccessStatusCode)
                 {
-                    string xmlContent = await response.Content.ReadAsStringAsync();
-
+                    //string xmlContent = await response.Content.ReadAsStringAsync();
 
                     XDocument xmlDocument = XDocument.Parse(xmlContent);
+
+
+                    var titleElement2 = xmlDocument.Descendants("info").FirstOrDefault();
+                    if (titleElement2 != null)
+                    {
+                        throw new ArgumentException(titleElement2.Value.ToString());
+                    }
+
+
                     var titleElement = xmlDocument.Descendants("item");
 
                     date = DateTime.ParseExact(xmlDocument.Element("rates").Element("date").Value, format, CultureInfo.InvariantCulture);
@@ -79,7 +109,5 @@ namespace LogicNameSpace
             return list;
         }
         #endregion
-
-
     }
 }

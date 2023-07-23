@@ -14,23 +14,33 @@ namespace TestApp.Controllers
         private readonly ILogic_Currency_DI _logic;
         private readonly IConfiguration _configuration;
         private readonly ICurrencyQueries_TestApp_DI _currencyQueries;
+        private readonly IValidationDateFormat_TestApp_DI _validatationDateFormat;
         private IMapper _mapper;
-        public CurrencyController(ILogic_Currency_DI logic,
+        public CurrencyController(
+            ILogic_Currency_DI logic,
             IConfiguration configuration,
             ICurrencyQueries_TestApp_DI currencyQueries,
+            IValidationDateFormat_TestApp_DI validatationDateFormat,
             IMapper mapper
             )
         {
             _logic = logic;
             _configuration = configuration;
             _currencyQueries = currencyQueries;
+            _validatationDateFormat = validatationDateFormat;
             _mapper = mapper;
         }
 
         [HttpGet("save")]
-        public async Task<IActionResult> currencySave()
+        public async Task<IActionResult> currencySave([FromQuery] string date)
         {
-            var data = await _logic.processWithCurrencyFacade(_configuration["EXTERNAL_API"]);
+            var validateDate = _validatationDateFormat.checkValidateDateFormat(date);
+            if (validateDate.status == false)
+            {
+                return BadRequest(validateDate.ErrorMessage);
+            }
+            var data = await _logic.processWithCurrencyFacade(_configuration["EXTERNAL_API"] + date);
+            Console.WriteLine(data);
 
             var config = new MapperConfiguration(cfg =>
             {
@@ -55,15 +65,15 @@ namespace TestApp.Controllers
 
             try
             {
-                try
-                {
-                    DateTime newDate = DateTime.Parse(date);
-                }
-                catch (Exception)
-                {
+                //try
+                //{
+                //    DateTime newDate = DateTime.Parse(date);
+                //}
+                //catch (Exception)
+                //{
 
-                    throw new ArgumentException("Incorrect format");
-                }
+                //    throw new ArgumentException("Incorrect format");
+                //}
                 var parseDate = DateTime.Parse(date);
                 var data = await _currencyQueries.getCurrency(parseDate, code);
                 return Ok(data);
