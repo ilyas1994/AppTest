@@ -16,16 +16,23 @@ namespace TestApp.Queries
         {
             try
             {
+                var getDate = exchangeXMLModel.Select(x => x.Date).FirstOrDefault();
+                var checkRecord = await _dbContext.Set<R_CURRENCY>().Select(x => x.Date == getDate).FirstOrDefaultAsync();
+                if (checkRecord == true)
+                {
+                    var rCurrencyList = await _dbContext.Set<R_CURRENCY>().Where(x => x.Date == getDate).ToListAsync();
+                    _dbContext.RemoveRange(rCurrencyList);
+                    await _dbContext.SaveChangesAsync();
+
+                }
                 await _dbContext.Set<R_CURRENCY>().AddRangeAsync(exchangeXMLModel);
                 int numRecordSaved = await _dbContext.SaveChangesAsync();
                 var result = new { count = numRecordSaved };
                 return result;
 
-
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
                 throw new Exception(ex.InnerException.Message);
             }
         }
@@ -37,7 +44,7 @@ namespace TestApp.Queries
                 if (code != null)
                 {
                     var query = await _dbContext.Set<R_CURRENCY>()
-                    .Where(x => x.Date == date && x.Code == code).ToListAsync();
+                    .Where(x => x.Date == date && x.Code == code.ToUpper()).ToListAsync();
                     return query;
                 }
                 else
